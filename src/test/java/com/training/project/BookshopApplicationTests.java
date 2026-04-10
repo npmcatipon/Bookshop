@@ -1,9 +1,11 @@
-package com.example.demo;
+package com.training.project;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class BookshopApplicationTests {
 
 	@Test
