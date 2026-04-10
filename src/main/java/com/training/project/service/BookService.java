@@ -68,4 +68,17 @@ public class BookService {
         bookRepository.delete(book);
         return bookMapper.toDTO(book);
     }
+
+    /**
+     * Update a book using Book ID.
+     * 
+     * @param id of the book to be updated. Should not be {@code null}
+     * @return {@link BookDTO}
+     */
+    @Transactional
+    public BookDTO updateBook(Long id, BookDTO bookDto) {
+        Book book = bookRepository.findById(id)
+                    .orElseThrow(() -> new BookIdNotFoundException());
+        return bookMapper.toDTO(bookRepository.save(book));
+    }
 }
