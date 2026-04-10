@@ -1,5 +1,7 @@
 package com.training.project.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -22,6 +24,16 @@ public class BookService {
     public BookService(BookRepository bookRepository, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
+    }
+
+    /**
+     * Display all books added.
+     * 
+     * @return List of {@link Book}
+     */
+    @Transactional
+    public List<Book> readBook() {
+        return bookRepository.findAll();
     }
 
     /**
