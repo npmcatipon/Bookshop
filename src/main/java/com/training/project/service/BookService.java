@@ -14,9 +14,15 @@ import com.training.project.repository.BookRepository;
 
 import jakarta.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 @Validated
 public class BookService {
+
+    private static final Logger logger = 
+        LoggerFactory.getLogger(BookService.class);
 
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
@@ -33,6 +39,7 @@ public class BookService {
      */
     @Transactional
     public List<Book> readBook() {
+        logger.warn("Display All Books");
         return bookRepository.findAll();
     }
 
@@ -46,9 +53,11 @@ public class BookService {
     @Transactional
     public BookDTO createBook(BookDTO bookDto) {
         if (bookRepository.existsByTitleAndAuthor(bookDto.getTitle(),bookDto.getAuthor())) {
+                logger.error("Book already exists.");
                 throw new DuplicateBookException();
         }
 
+        logger.warn("Adding new book " + bookDto.getTitle());
         Book book = bookRepository.save(bookMapper.toEntity(bookDto));
 
         return bookMapper.toDTO(book);
@@ -63,9 +72,15 @@ public class BookService {
      */
     @Transactional
     public BookDTO deleteBook(Long id) {
+
+        logger.warn("Looking for Book ID " + id);
         Book book = bookRepository.findById(id)
                     .orElseThrow(() -> new BookIdNotFoundException());
+        
+        
         bookRepository.delete(book);
+        logger.error("Book " + book.getTitle() + " has been deleted.");
+
         return bookMapper.toDTO(book);
     }
 
@@ -77,8 +92,17 @@ public class BookService {
      */
     @Transactional
     public BookDTO updateBook(Long id, BookDTO bookDto) {
+        
+        logger.info("Searching for Book ID " + id);
         Book book = bookRepository.findById(id)
                     .orElseThrow(() -> new BookIdNotFoundException());
+
+        book.setTitle(bookDto.getTitle());
+        book.setAuthor(bookDto.getAuthor());
+
+        logger.info("Updating Book ID " + book.getId() + 
+                " title to " + book.getTitle() + 
+                " and author to " + book.getAuthor() + ".");
         return bookMapper.toDTO(bookRepository.save(book));
     }
 }
