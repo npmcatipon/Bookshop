@@ -39,19 +39,19 @@ public class BookService {
     /**
      * Create a {@link Book} and save to database. 
      * 
-     * @param bookDto to create; must not be {@code null}
-     * @return the created book as a {@link Book}
+     * @param bookDto of object to be created; must not be {@code null}
+     * @return the created book as a {@link BookDTO}
      * @throws {@link DuplicateBookException} if {@code title} and {@code author} exists in database.
      */
     @Transactional
-    public Book createBook(BookDTO bookDto) {
+    public BookDTO createBook(BookDTO bookDto) {
         if (bookRepository.existsByTitleAndAuthor(bookDto.getTitle(),bookDto.getAuthor())) {
                 throw new DuplicateBookException();
         }
 
         Book book = bookRepository.save(bookMapper.toEntity(bookDto));
 
-        return book;
+        return bookMapper.toDTO(book);
     }
 
     /**

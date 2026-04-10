@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -35,13 +36,18 @@ public class BookServiceTest {
     private BookService bookService;
 
     Book book;
+    Book book2;
+    List<Book> books;
     BookDTO bookDto;
 
     @BeforeEach
     void setup() {
 
         book = new Book("sample", "author");
+        book2 = new Book("sample 2", "author 2");
         bookDto = new BookDTO("sample", "author");
+
+        books = List.of(book, book2);
 
     }
 
@@ -54,8 +60,10 @@ public class BookServiceTest {
         when(bookMapper.toEntity(any(BookDTO.class))).thenReturn(book);
 
         when(bookRepository.save(any(Book.class))).thenReturn(book);
+
+        when(bookMapper.toDTO(any(Book.class))).thenReturn(bookDto);
         
-        Book result = bookService.createBook(bookDto);
+        BookDTO result = bookService.createBook(bookDto);
         
         assertNotNull(result);
         assertEquals("sample", result.getTitle());
@@ -111,5 +119,19 @@ public class BookServiceTest {
 
         verify(bookRepository, never()).delete(any());
         verify(bookMapper, never()).toDTO(book);
+    }
+
+    @Test
+    public void readBook_success() {
+        when(bookRepository.findAll()).thenReturn(books);
+
+        List<Book> result = bookService.readBook();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("sample", result.get(0).getTitle());
+        assertEquals("sample 2", result.get(1).getTitle());
+
+        verify(bookRepository).findAll();
     }
 }

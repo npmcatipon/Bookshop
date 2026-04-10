@@ -70,5 +70,4 @@ public class Book {
     void onCreate() {
         this.dateCreated = LocalDate.now();
     }
-
 }

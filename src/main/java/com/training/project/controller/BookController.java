@@ -41,12 +41,13 @@ public class BookController {
     
     @PostMapping
     public ResponseEntity<ApiResponse> createBook(@Valid @RequestBody BookDTO bookDto) {
+        BookDTO newBookDto = bookService.createBook(bookDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED.value())
                 .body(
                     ApiResponse.of(HttpStatus.CREATED.value(), 
                     "Successfully created a book. " + 
-                    bookService.createBook(bookDto).toString())
+                    newBookDto.toString())
                 );
     }
 
