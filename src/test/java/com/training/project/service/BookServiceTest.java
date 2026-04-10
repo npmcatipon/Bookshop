@@ -2,7 +2,9 @@ package com.training.project.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -43,9 +45,9 @@ public class BookServiceTest {
     @BeforeEach
     void setup() {
 
-        book = new Book("sample", "author");
+        book = new Book("sample 1", "author 1");
+        book.setId(1L);
         book2 = new Book("sample 2", "author 2");
-        bookDto = new BookDTO("sample", "author");
 
         books = List.of(book, book2);
 
@@ -53,6 +55,8 @@ public class BookServiceTest {
 
     @Test
     void createBook_successful() {
+
+        bookDto = new BookDTO("sample 1", "author 1");
 
         when(bookRepository.existsByTitleAndAuthor(book.getTitle(), book.getAuthor()))
             .thenReturn(false);
@@ -66,18 +70,18 @@ public class BookServiceTest {
         BookDTO result = bookService.createBook(bookDto);
         
         assertNotNull(result);
-        assertEquals("sample", result.getTitle());
-        assertEquals("author", result.getAuthor());
+        assertEquals("sample 1", result.getTitle());
+        assertEquals("author 1", result.getAuthor());
 
         verify(bookMapper).toEntity(bookDto);
         verify(bookRepository).save(book);
     }
 
     @Test
-    public void createBook_faild_duplicateBookTitleAndAuthor() {
-        BookDTO bookDto = new BookDTO(
-            "sample", 
-            "author");
+    public void createBook_failed_duplicateBookTitleAndAuthor() {
+        bookDto = new BookDTO(
+            "sample 1", 
+            "author 1");
         when(bookRepository.existsByTitleAndAuthor(
                 book.getTitle(), 
                 book.getAuthor()
@@ -100,7 +104,7 @@ public class BookServiceTest {
 
         BookDTO dto = bookService.deleteBook(book.getId());
 
-        assertNotNull(dto);
+        assertNull(dto);
 
         verify(bookRepository).findById(book.getId());
         verify(bookRepository).delete(book);
@@ -129,9 +133,46 @@ public class BookServiceTest {
 
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("sample", result.get(0).getTitle());
+        assertEquals("sample 1", result.get(0).getTitle());
         assertEquals("sample 2", result.get(1).getTitle());
 
         verify(bookRepository).findAll();
+    }
+
+    @Test
+    public void readBook_failed_noBooksAvailable() {
+        when(bookRepository.findAll()).thenReturn(List.of());
+
+        List<Book> result = bookService.readBook();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(bookRepository).findAll();
+        
+    }
+
+    @Test
+    public void updateBook_success() {
+        Long id = 1L;
+        bookDto = new BookDTO(
+                        "The new title", 
+                        "The new author");
+
+        when(bookRepository.findById(id))
+                .thenReturn(Optional.of(book));
+        when(bookRepository.save(any(Book.class))).thenReturn(book);
+        when(bookMapper.toDTO(book))
+                .thenReturn(bookDto);
+
+        BookDTO result = bookService.updateBook(id, bookDto);
+
+        assertNotNull(result);
+        assertEquals("The new title", result.getTitle());
+        assertEquals("The new author", result.getAuthor());
+
+        verify(bookRepository).findById(id);
+        verify(bookRepository).save(book);
+        verify(bookMapper).toDTO(book);
     }
 }
