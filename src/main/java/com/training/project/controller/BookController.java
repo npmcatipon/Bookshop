@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.training.project.dto.BookDTO;
 import com.training.project.entity.Book;
 import com.training.project.exception.ApiResponse;
-import com.training.project.exception.BookIdNotFoundException;
+import com.training.project.exception.NoBooksAvailableException;
 import com.training.project.service.BookService;
 
 import jakarta.validation.Valid;
@@ -36,22 +36,24 @@ public class BookController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<Book>>> readBook(){
         List<Book> books = bookService.readBook();
         if (books.isEmpty()) {
-            throw new BookIdNotFoundException();
+            throw new NoBooksAvailableException();
         }
         return ResponseEntity.ok(ApiResponse.success("Success", books));
     }
     
     @PostMapping
-    @PreAuthorize("ADMIN")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BookDTO>> createBook(@Valid @RequestBody BookDTO bookDto) {
         BookDTO newBookDto = bookService.createBook(bookDto);
         return ResponseEntity.ok(ApiResponse.success("Success", newBookDto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BookDTO>> deleteBook(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(
             "Successfully deleted book.", 
@@ -60,6 +62,7 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BookDTO>> updateBook(
         @PathVariable Long id,
         @Valid @RequestBody BookDTO bookDto
